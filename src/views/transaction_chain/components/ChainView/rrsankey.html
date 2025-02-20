@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sankey Diagram</title>
+  <!-- 加载 D3 库 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- 加载 D3 Sankey 插件 -->
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12/dist/d3-sankey.min.js"></script>
+  <style>
+    /* 定义样式 */
+    div {
+      color: grey;
+      font: 13px/25.5px var(--sans-serif);
+      text-transform: uppercase;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+      font: 10px sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- 创建容器 -->
+  <div>
+    <h1 style="display: none;">Sankey diagram</h1>
+  </div>
+
+  <!-- 添加图表容器 -->
+  <div id="chart-container"></div>
+
+  <script>
+    // JavaScript 代码开始
+    // 复制你提供的 JavaScript 代码片段到这里
+
+    // 将代码粘贴到这里，但不需要包括 export default function define(...) { ... }
+
+    // 在此处省略 _1、_linkColor、_nodeAlign、_chart、_data、_d3、_text 等函数的定义
+    function _chart(d3,nodeAlign,data)
+      {
+        // Specify the dimensions of the chart.
+        const width = 928;
+        const height = 600;
+        const format = d3.format(",.0f");
+
+        // Create a SVG container.
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [- 20, - 20, width + 40, height + 40])
+            .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
+
+        // Constructs and configures a Sankey generator.
+        const sankey = d3.sankey()
+            .nodeId(d => d.name)
+            .nodeAlign(d3[nodeAlign]) // d3.sankeyLeft, etc.
+            .nodeWidth(30)
+            .nodePadding(15)
+            .extent([[1, 10], [width - 1, height - 5]]);
+
+        // Applies it to the data. We make a copy of the nodes and links objects
+        // so as to avoid mutating the original.
+        const {nodes, links} = sankey({
+          nodes: data.nodes.map(d => Object.assign({}, d)),
+          links: data.links.map(d => Object.assign({}, d))
+        });
+
+        // Defines a color scale.
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        // console.log("link", links)
+        // Creates the paths that represent the links.
+        const link = svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke-opacity", 0.5)
+          .selectAll()
+          .data(links)
+          .join("g")
+            .style("mix-blend-mode", "multiply");
+
+        // Creates the rects that represent the nodes.
+        const rect1 = svg.append("g")
+            .attr("stroke", "#000")
+          .selectAll()
+          .data(nodes)
+          .join("rect")
+            .attr("x", d => d.x0)
+            .attr("y", d => d.y0)
+            .attr("height", d => d.y1 - d.y0)
+            .attr("width", d => d.x1 - d.x0)
+            .attr("fill", d => color(d.category))
+            .on('mouseover', (d, e) => {
+              const highlighted = connected(e);
+              svg.selectAll('rect, path, text').style('opacity', (e) => {
+                const is = !e || highlighted.has(e);
+                return is ? 1 : 0.1
+              });
+            })
+            .on('mouseout', () => {
+              svg.selectAll('rect, path, text').style('opacity', null);
+            });
+        // const roundedRect = svg.append("g")
+        //   .attr("stroke", "#000")
+        // .selectAll()
+        // .data(nodes)
+        // .join("g");
+        // roundedRect.append("rect")
+        //   .attr("x", d => d.x0)
+        //   .attr("y", d => d.y0)
+        //   .attr("height", d => d.y1 - d.y0)
+        //   .attr("width", d => d.x1 - d.x0)
+        //   .attr("fill", d => color(d.category))
+        //   .on('mouseover', (d, e) => {
+        //     const highlighted = connected(e);
+        //     svg.selectAll('rect, circle, path, text').style('opacity', (e) => {
+        //       const is = !e || highlighted.has(e);
+        //       return is ? 1 : 0.1;
+        //     });
+        //   })
+        //   .on('mouseout', () => {
+        //     svg.selectAll('rect, circle, path, text').style('opacity', null);
+        //   });
+        //   const cornerRadius = 10; // 圆角半径
+
+        // roundedRect.selectAll("circle")
+        //     .data(d => {
+        //       // 计算每个角的圆形的数据
+        //       return [
+        //         { x: d.x0, y: d.y0 }, // 左上角
+        //         { x: d.x1, y: d.y0 }, // 右上角
+        //         { x: d.x0, y: d.y1 }, // 左下角
+        //         { x: d.x1, y: d.y1 }  // 右下角
+        //       ];
+        //     })
+        //     .join("circle")
+        //     .attr("cx", d => d.x)
+        //     .attr("cy", d => d.y)
+        //     .attr("r", cornerRadius)
+        //     .attr("fill", "#fff"); // 圆形的颜色可以根据需要进行调整
+
+            // const multipleCirclesInRect = svg.append("g")
+            //     .attr("stroke", "#000")
+            //   .selectAll()
+            //   .data(nodes)
+            //   .join("g");
+
+            // const circleDiameter = 20; // 圆形直径
+            // const rectWidth = 4 * circleDiameter; // 矩形宽度
+
+            // multipleCirclesInRect.append("rect")
+            //     .attr("x", d => d.x0)
+            //     .attr("y", d => d.y0)
+            //     .attr("height", d => circleDiameter)
+            //     .attr("width", rectWidth)
+            //     .attr("fill", "#fff") // 如果需要矩形填充颜色，可以在这里设置
+            //     .attr("stroke", "#000"); // 如果需要矩形边框颜色，可以在这里设置
+
+            // multipleCirclesInRect.selectAll("circle")
+            //     .data(d => {
+            //       // 计算每个圆形的数据
+            //       return [
+            //         { cx: d.x0 + circleDiameter / 2, cy: d.y0 + circleDiameter / 2 }, // 第一个圆心位置
+            //         { cx: d.x0 + circleDiameter / 2 + circleDiameter, cy: d.y0 + circleDiameter / 2 }, // 第二个圆心位置
+            //         { cx: d.x0 + circleDiameter / 2 + 2 * circleDiameter, cy: d.y0 + circleDiameter / 2 }, // 第三个圆心位置
+            //         { cx: d.x0 + circleDiameter / 2 + 3 * circleDiameter, cy: d.y0 + circleDiameter / 2 }  // 第四个圆心位置
+            //       ];
+            //     })
+            //     .join("circle")
+            //     .attr("cx", d => d.cx)
+            //     .attr("cy", d => d.cy)
+            //     .attr("r", circleDiameter / 2)
+            //     .attr("fill", "#000"); // 圆形的颜色可以根据需要进行调整
+        const rect = svg.append("g")
+            .attr("stroke", "#000")
+          .selectAll()
+          .data(nodes)
+          .join("circle")
+            .attr("cx", d => (d.x0 + d.x1) / 2) // 圆心的 x 坐标
+            .attr("cy", d => (d.y0 + d.y1) / 2) // 圆心的 y 坐标
+            .attr("r", d => (d.x1 - d.x0) / 2)  // 半径
+            .attr("fill", d => color(d.category))
+            .on('mouseover', (d, e) => {
+              const highlighted = connected(e);
+              svg.selectAll('circle, path, text').style('opacity', (e) => {
+                const is = !e || highlighted.has(e);
+                return is ? 1 : 0.1;
+              });
+            })
+            .on('mouseout', () => {
+              svg.selectAll('circle, path, text').style('opacity', null);
+            });
+
+        function connected(e) {
+          const ids = new Set()
+          ids.add(e)
+          traverse(ids, e, 'source', 'target');
+          traverse(ids, e, 'target', 'source');
+          return ids;
+        }
+
+        function traverse(result, d, path, other) {
+          result.add(d);
+          for (const link of d[path + 'Links']) {
+            result.add(link);
+            traverse(result, link[other], path, other);
+          }
+        }
+
+        // Adds a title on the nodes.
+        rect.append("title")
+            .text(d => `${d.name}\n${format(d.value)} TWh`);
+
+        link.append("path")
+            .attr("d", d3.sankeyLinkHorizontal())
+            .attr("stroke", '#aaa')
+            .attr("stroke-width", d => 3);
+
+        link.append("title")
+            .text(d => `${d.source.name} → ${d.target.name}\n${format(d.value)} TWh`);
+
+        // Adds labels on the nodes.
+        svg.append("g")
+          .selectAll()
+          .data(nodes)
+          .join("text")
+            .attr("x", d => (d.x0 + d.x1) / 2)
+            .attr("y", d => d.y1 + 6)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", 'middle')
+            .text(d => d.name)
+            .on('mouseover', (d, e) => {
+              const highlighted = connected(e);
+              svg.selectAll('rect, path, text').style('opacity', (e) => {
+                const is = !e || highlighted.has(e);
+                return is ? 1 : 0.1
+              });
+            })
+            .on('mouseout', () => {
+              svg.selectAll('rect, path, text').style('opacity', null);
+            });
+
+        return svg.node();
+      }
+    function _text(){return(
+      `
+      process_maxima	intersect_util
+      process_maxima	process_horizontal
+      process_maxima	topology_correction
+      quick_clip	wagyu
+      snap_rounding	intersect_util
+      vatti	intersect_util
+      vatti	process_horizontal
+      vatti	process_maxima
+      wagyu	snap_rounding
+      wagyu	topology_correction
+      wagyu	vatti
+      `
+      )}
+    function _data(text)
+      {
+        const links = text.trim().split('\n').map(d => d.split('\t')).map(([a,b]) => ({source:a,target:b,value:1}));
+        const nodes = Array.from(new Set(links.flatMap(l => [l.source, l.target])), name => ({name, category: name.replace(/ .*/, "")}));
+        return {nodes, links};
+      }
+    // 在这里定义 main 函数
+    function main() {
+      // 获取数据
+      const textData = _text();
+      const data = _data(textData);
+
+      // 获取选项
+      const nodeAlign = "sankeyLeft"; // 你可以根据需要修改节点对齐方式
+
+      // 创建图表
+      const svg = _chart(d3, nodeAlign, data);
+
+      // 将图表添加到 HTML 中
+      document.getElementById('chart-container').appendChild(svg);
+    }
+
+    // 在加载完成时运行 main 函数
+    window.onload = main;
+  </script>
+</body>
+</html>

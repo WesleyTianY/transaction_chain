@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tangled Tree Visualization</title>
+    <style>
+        svg {
+            background-color: #ffffff;
+        }
+        .link {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 2;
+        }
+        /* .node {
+            fill: white;
+            stroke: black;
+            stroke-width: 2;
+        } */
+        .label {
+            font-family: sans-serif;
+            font-size: 12px;
+            fill: black;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <svg id="chart" width="1400" height="800"></svg>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        function renderChart(tangleLayout) {
+            const svg = d3.select("#chart");
+            const background_color = "grey";
+            const options = {
+                color: (b, i) => i % 2 === 0 ? "blue" : "blue" // Example color function, you can replace it with your own logic
+            };
+
+            // Draw links
+            svg.selectAll(".link")
+               .data(tangleLayout.bundles)
+               .enter().append("g")
+               .attr("class", "link")
+               .selectAll("path")
+               .data(b => b.links)
+               .enter().append("path")
+               .attr("d", l => {
+                   const d = `M${l.xt} ${l.yt}
+                              L${l.xb} ${l.yt}
+                              // A${l.c1} ${l.c1} 90 0 1 ${l.xb} ${l.yt + l.c1}
+                              // L${l.xb} ${l.ys - l.c2}
+                              // A${l.c2} ${l.c2} 90 0 0 ${l.xb + l.c2} ${l.ys}
+                              // L${l.xs} ${l.ys}`;
+                   return d;
+               })
+               .attr("stroke", (d, i) => options.color(tangleLayout.bundles[i], i))
+               .attr("stroke-width", 2); // Example stroke-width logic
+
+            // Draw nodes
+            svg.selectAll(".node")
+               .data(tangleLayout.nodes)
+               .enter().append("circle")
+               .attr("class", "node")
+               .attr("cx", d => d.xy_coordinates.x)
+               .attr("cy", d => d.xy_coordinates.y + 50)
+               .attr("r", 7)
+            //    .attr("fill", 'black')
+               .attr("fill", d => `rgb(${d.color[0]}, ${d.color[1]}, ${d.color[2]})`) // 移除了多余的括号
+            //    .attr("stroke", "red")
+               .attr("stroke-width", 2);
+
+            // Draw node labels
+            svg.selectAll(".label")
+               .data(tangleLayout.nodes)
+               .enter().append("text")
+               .attr("class", "label")
+               .attr("x", d => d.xy_coordinates.x)
+               .attr("y", d => d.xy_coordinates.y+ 50)
+               .attr("dy", "-1em")
+               .attr("text-anchor", "middle")
+               .text(d => d.name.slice(-2))
+               .style("font-size", "8px")
+        }
+
+        d3.json("data_chain.json").then(function(data) {
+            renderChart(data); // 调用渲染图表的函数，并传递加载的数据作为参数
+        }).catch(function(error) {
+            console.error("Error loading the JSON file:", error);
+        });
+    </script>
+</body>
+</html>

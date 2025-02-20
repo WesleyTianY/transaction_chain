@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "axios": "0.18.1",
+    "bootstrap-vue": "^2.23.1",
     "core-js": "3.6.5",
+    "d3": "^7.9.0",
+    "date-fns": "^4.1.0",
     "element-ui": "2.13.2",
     "js-cookie": "2.2.0",
     "normalize.css": "7.0.0",
@@ -23,6 +26,7 @@
     "path-to-regexp": "2.4.0",
     "vue": "2.6.10",
     "vue-router": "3.0.6",
+    "vue-slider-component": "^3.2.24",
     "vuex": "3.1.0"
   },
   "devDependencies": {

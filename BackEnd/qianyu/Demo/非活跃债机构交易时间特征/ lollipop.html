@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>交易时间特征</title>
+<!-- <link rel="stylesheet" type="text/css" href="./inspector.css"> -->
+<body>
+    <div id="container">
+        <h1>每个机构随时间的交易特征</h1>
+        <p>以下展示不同机构-交易员的交易细节</p>
+        <div id="my_dataviz" style="display: flex; flex-direction: column; align-items: center;"></div>
+    </div>
+
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="./lollipop.js"></script>
+</body>
+</html>
+
+<style>
+    #container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    #my_dataviz {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;  /* 替代margin-bottom */
+    }
+
+    .lollipop-box {
+        width: 100%;
+    }
+
+    .lollipop {
+        border: 1px solid #f0f0f0;
+        border-radius: 5px;
+        width: 100%;
+        height: 200px;
+        padding: 10px;
+    }
+
+    .lollipop svg {
+        width: 100%;
+        height: 100%;
+        display: block; 
+    }
+</style>
